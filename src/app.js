@@ -26,8 +26,22 @@ app.use(express.static(__dirname + "/public"));
 
 app.use(cookieParser("S3cr3tC0d3"));
 
+// Configurar sesiones
+app.use(
+  session({
+    secret: "S3cr3tC0d3", // Asegúrate de usar una clave secreta
+    resave: false,
+    saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URL, // Guarda las sesiones en MongoDB
+    }),
+  })
+);
+
+// Inicializar Passport
 initializePassport();
 app.use(passport.initialize());
+app.use(passport.session());
 
 app.use("/users", usersViewRouter);
 app.use("/api/sessions", sessionsRouter);
