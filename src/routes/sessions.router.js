@@ -5,23 +5,22 @@ import { isValidPassword, generateJWToken } from "../utils.js";
 
 const router = Router();
 
-router.post(
-  "/register",
-  async (req, res, next) => {
-    passport.authenticate("register", async (err, user, info) => {
-      if (err) {
-        console.error("Error en el registro:", err);
-        return res.status(500).send({ error: "Error en el servidor." });
-      }
-      if (!user) {
-        console.warn("Fallo en el registro:", info);
-        return res.status(401).send({ error: "No se pudo crear el usuario." });
-      }
-      console.log("Usuario registrado con éxito:", user);
-      res.status(201).send({ status: "success", message: "Usuario creado con éxito." });
-    })(req, res, next);
-  }
-);
+router.post("/register", async (req, res, next) => {
+  passport.authenticate("register", async (err, user, info) => {
+    if (err) {
+      console.error("Error en el registro:", err);
+      return res.status(500).send({ error: "Error en el servidor." });
+    }
+    if (!user) {
+      console.warn("Fallo en el registro:", info);
+      return res.status(401).send({ error: "No se pudo crear el usuario." });
+    }
+    console.log("Usuario registrado con éxito:", user);
+    res
+      .status(201)
+      .send({ status: "success", message: "Usuario creado con éxito." });
+  })(req, res, next);
+});
 
 router.get("/fail-register", (req, res) => {
   res.status(401).send({ error: "Failed to process register!" });

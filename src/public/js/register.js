@@ -18,10 +18,10 @@ form.addEventListener("submit", (e) => {
     .then((result) => {
       if (result.status === 201) {
         result.json();
-        alert("Usuario creado con exito!");
+        alert("¡Usuario creado con exito!");
         window.location.replace("/users/login");
       } else {
-        alert("No se pudo crear el usuario!");
+        alert("No se pudo crear el usuario");
       }
     })
     .then((json) => console.log(json));

@@ -2,13 +2,17 @@ import passport from "passport";
 import passportLocal from "passport-local";
 import jwtStrategy from "passport-jwt";
 import userModel from "../models/user.model.js";
-import { createHash, PRIVATE_KEY, cookieExtractor } from "../utils.js";
+import {
+  createHash,
+  isValidPassword,
+  PRIVATE_KEY,
+  cookieExtractor,
+} from "../utils.js";
 
 const JwtStrategy = jwtStrategy.Strategy;
 const ExtractJWT = jwtStrategy.ExtractJwt;
 
 const initializePassport = () => {
-  // Estrategia JWT
   passport.use(
     "jwt",
     new JwtStrategy(
@@ -28,7 +32,6 @@ const initializePassport = () => {
     )
   );
 
-  // Estrategia de Registro Local
   passport.use(
     "register",
     new passportLocal.Strategy(
@@ -37,7 +40,7 @@ const initializePassport = () => {
         const { first_name, last_name, email, age } = req.body;
         try {
           console.log("Intentando registrar usuario:", username);
-          
+
           const exists = await userModel.findOne({ email: username });
           if (exists) {
             console.warn("El usuario ya existe:", username);
@@ -50,7 +53,7 @@ const initializePassport = () => {
             last_name,
             email,
             age,
-            password: createHash(password),
+            password,
             loggedBy: "App",
           });
 
@@ -65,14 +68,40 @@ const initializePassport = () => {
       }
     )
   );
+  passport.use(
+    "login",
+    new passportLocal.Strategy(
+      { usernameField: "email" },
+      async (username, password, done) => {
+        try {
+          console.log("Intentando iniciar sesión con:", username);
 
-  // Serialización del usuario (Guarda solo el ID en la sesión)
+          const user = await userModel.findOne({ email: username });
+          if (!user) {
+            console.warn("Usuario no encontrado:", username);
+            return done(null, false, { message: "Usuario no encontrado" });
+          }
+
+          if (!isValidPassword(user, password)) {
+            console.warn("Contraseña incorrecta para usuario:", username);
+            return done(null, false, { message: "Credenciales inválidas" });
+          }
+
+          console.log("Usuario autenticado con éxito:", username);
+          return done(null, user);
+        } catch (error) {
+          console.error("Error en la estrategia de login:", error);
+          return done(error);
+        }
+      }
+    )
+  );
+
   passport.serializeUser((user, done) => {
     console.log("Serializando usuario:", user);
     done(null, user._id);
   });
 
-  // Deserialización del usuario (Recupera usuario desde la BD)
   passport.deserializeUser(async (id, done) => {
     try {
       console.log("Deserializando usuario con ID:", id);
