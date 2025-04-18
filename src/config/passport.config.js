@@ -2,16 +2,15 @@ import passport from "passport";
 import passportLocal from "passport-local";
 import jwtStrategy from "passport-jwt";
 import userModel from "../models/user.model.js";
+import cartModel from "../models/cart.model.js";
 import {
   createHash,
   isValidPassword,
   PRIVATE_KEY,
   cookieExtractor,
 } from "../utils.js";
-
 const JwtStrategy = jwtStrategy.Strategy;
 const ExtractJWT = jwtStrategy.ExtractJwt;
-
 const initializePassport = () => {
   passport.use(
     "jwt",
@@ -31,7 +30,6 @@ const initializePassport = () => {
       }
     )
   );
-
   passport.use(
     "register",
     new passportLocal.Strategy(
@@ -48,12 +46,16 @@ const initializePassport = () => {
           }
 
           console.log("Creando nuevo usuario...");
+
+          const newCart = await cartModel.create({});
+
           const newUser = new userModel({
             first_name,
             last_name,
             email,
             age,
             password,
+            cart: newCart._id,
             loggedBy: "App",
           });
 
@@ -96,16 +98,14 @@ const initializePassport = () => {
       }
     )
   );
-
   passport.serializeUser((user, done) => {
     console.log("Serializando usuario:", user);
     done(null, user._id);
   });
-
   passport.deserializeUser(async (id, done) => {
     try {
       console.log("Deserializando usuario con ID:", id);
-      const user = await userModel.findById(id);
+      const user = await userModel.findById(id).populate("cart");
       done(null, user);
     } catch (error) {
       console.error("Error al deserializar usuario:", error);
@@ -113,5 +113,4 @@ const initializePassport = () => {
     }
   });
 };
-
 export default initializePassport;
