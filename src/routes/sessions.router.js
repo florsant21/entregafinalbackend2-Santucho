@@ -1,7 +1,9 @@
+import userModel from "../dao/models/user.model.js";
 import { Router } from "express";
 import passport from "passport";
-import userModel from "../models/user.model.js";
-import { isValidPassword, generateJWToken } from "../utils.js";
+import { UserRepo } from "../repositories/index.js";
+import UserDTO from "../dao/dtos/user.dto.js";
+import { isValidPassword, generateJWToken } from "../utils/index.js";
 
 const router = Router();
 
@@ -74,7 +76,8 @@ router.get(
       if (!req.user) {
         return res.status(401).json({ error: "No se encontró el usuario" });
       }
-      res.status(200).json(req.user);
+      const userDTO = new UserDTO(req.user);
+      res.status(200).json(userDTO);
     } catch (error) {
       res.status(500).json({ error: "Error al obtener datos del usuario" });
     }

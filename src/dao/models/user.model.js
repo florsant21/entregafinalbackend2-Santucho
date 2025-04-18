@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { createHash } from "../utils.js";
+import { createHash } from "../../utils.js";
 
 const collection = "users";
 

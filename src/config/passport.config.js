@@ -1,8 +1,9 @@
 import passport from "passport";
 import passportLocal from "passport-local";
 import jwtStrategy from "passport-jwt";
-import userModel from "../models/user.model.js";
-import cartModel from "../models/cart.model.js";
+import userModel from "../dao/models/user.model.js";
+import cartModel from "../dao/models/cart.model.js";
+
 import {
   createHash,
   isValidPassword,
